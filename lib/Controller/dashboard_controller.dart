@@ -12,13 +12,17 @@ class DashboardController extends GetxController{
 
   var selectedIndex = 0.obs;
 
-  final List<Widget> pages = [
-    Showpage(),
+  // Create pages lazily to avoid circular reference
+  List<Widget> get pages => [
+    Showpage(onNavigateToFavorites: () => changePage(1)),
     Favoritespage(),
     Profilepage(),
   ];
 
   void changePage(int index){
+    print('🔄 DashboardController.changePage called with index: $index');
+    print('📍 Previous selectedIndex: ${selectedIndex.value}');
     selectedIndex.value = index;
+    print('✅ New selectedIndex: ${selectedIndex.value}');
   }
 }

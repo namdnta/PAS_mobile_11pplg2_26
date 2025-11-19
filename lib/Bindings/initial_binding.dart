@@ -1,11 +1,9 @@
 import 'package:get/get.dart';
 import 'package:pas_mobile_11pplg2_26/Controller/auth_controller.dart';
-import 'package:pas_mobile_11pplg2_26/Controller/splashscreen_controller.dart';
 
-class SplashBinding extends Bindings {
+class InitialBinding extends Bindings {
   @override
   void dependencies() {
     Get.put<AuthController>(AuthController(), permanent: true);
-    Get.lazyPut<SplashscreenController>(() => SplashscreenController());
   }
 }
