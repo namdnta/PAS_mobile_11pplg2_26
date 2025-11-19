@@ -4,14 +4,14 @@ import 'package:pas_mobile_11pplg2_26/Components/Custom_Button.dart';
 import 'package:pas_mobile_11pplg2_26/Components/Custom_Colors.dart';
 import 'package:pas_mobile_11pplg2_26/Components/Custom_Text.dart';
 // import 'package:pas_mobile_11pplg2_26/Components/Custom_Textfield.dart';
-import 'package:pas_mobile_11pplg2_26/Controller/auth_controller.dart';
+import 'package:pas_mobile_11pplg2_26/Controller/login_controller.dart';
 
-class Loginpage extends StatelessWidget{
- const Loginpage({super.key});
+class LoginPage extends StatelessWidget{
+ const LoginPage({super.key});
 
   @override
   Widget build (BuildContext context){
-  final authController = Get.find<AuthController>();
+  final loginController = Get.find<LoginController>();
 
     return Scaffold(
       body: Container(
@@ -54,7 +54,7 @@ class Loginpage extends StatelessWidget{
                 fillColor: AppColors. softCreamLight,
                 filled: true,
               ),
-              onChanged: authController.updateUsername,
+              onChanged: loginController.updateUsername,
             ),
             ),
 
@@ -70,14 +70,44 @@ class Loginpage extends StatelessWidget{
                 filled: true,
               ),
               obscureText: true,
-              onChanged: authController.updatePassword,
+              onChanged: loginController.updatePassword,
             ),
             ),
 
           CustomButton(myText: 'Login', 
           onPressed: () {
-            authController.login();
-          } )
+            loginController.login();
+          }),
+          
+          Container(
+            margin: EdgeInsets.only(top: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Don't have an account? ",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 14,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Get.toNamed('/register');
+                  },
+                  child: Text(
+                    "Sign Up",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           ],
         ),
       )

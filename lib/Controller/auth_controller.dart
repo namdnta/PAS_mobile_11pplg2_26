@@ -1,88 +1,71 @@
+import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:pas_mobile_11pplg2_26/Models/loginmodel.dart';
-import 'package:pas_mobile_11pplg2_26/Pages/showPage.dart';
-import 'package:pas_mobile_11pplg2_26/Services/LoginServices.dart';
+import 'package:pas_mobile_11pplg2_26/Models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthController extends GetxController {
+  var currentUser = Rxn<User>();
+  var isLoggedIn = false.obs;
 
-  var username = ''.obs;
-  var password = ''.obs;
-  var isLoading = false.obs;
-
-
-void clearForm() {
-    username.value = '';
-    password.value = '';
+  @override
+  void onInit() {
+    super.onInit();
+    checkLoginStatus();
   }
 
-  void updateUsername(String value) {
-    username.value = value;
-  }
-
-  void updatePassword(String value) {
-    password.value = value;
-  }
-
-  // === LOGIN VIA API ===
-  Future<LoginModel?> login() async {
-    print('=== LOGIN METHOD CALLED ===');
-    print('Username: ${username.value}, Password: ${password.value}');
-
-    String actualUsername = username.value.trim();
-    String actualPassword = password.value.trim();
-
-    if (actualUsername.isEmpty || actualPassword.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Username dan password tidak boleh kosong',
-        backgroundColor: Get.theme.colorScheme.error,
-        colorText: Get.theme.colorScheme.onError,
-      );
-      return null;
-    }
-
-    isLoading.value = true;
-
+  // Check if user is already logged in
+  Future<void> checkLoginStatus() async {
     try {
-      final result = await LoginService.login(actualUsername, actualPassword);
-      if (result != null && result.status) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', result.token);
-
-        Get.snackbar(
-          'Login Berhasil 🎉',
-          result.message.isNotEmpty ? result.message : 'Login berhasil',
-          backgroundColor: Get.theme.colorScheme.primary,
-          colorText: Get.theme.colorScheme.onPrimary,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-
-        Future.delayed(const Duration(seconds: 1), () {
-          Get.off(() => Showpage());
-        });
-
-        return result;
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      final userData = prefs.getString('user');
+      
+      if (token != null && userData != null) {
+        currentUser.value = User.fromJson(jsonDecode(userData));
+        isLoggedIn.value = true;
       } else {
-        Get.snackbar(
-          'Login Gagal ❌',
-          result?.message ?? 'Terjadi kesalahan saat login',
-          backgroundColor: Get.theme.colorScheme.error,
-          colorText: Get.theme.colorScheme.onError,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        return null;
+        isLoggedIn.value = false;
       }
     } catch (e) {
+      print('Error checking login status: $e');
+      isLoggedIn.value = false;
+    }
+  }
+
+  // Save login data (called from LoginController after successful login)
+  Future<void> setLoginData(String token, User user) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+      await prefs.setString('user', jsonEncode(user.toJson()));
+      
+      currentUser.value = user;
+      isLoggedIn.value = true;
+    } catch (e) {
+      print('Error saving login data: $e');
+    }
+  }
+
+  // Logout user
+  Future<void> logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token');
+      await prefs.remove('user');
+      
+      currentUser.value = null;
+      isLoggedIn.value = false;
+
       Get.snackbar(
-        'Error ⚠️',
-        'Tidak dapat terhubung ke server: $e',
-        backgroundColor: Get.theme.colorScheme.error,
-        colorText: Get.theme.colorScheme.onError,
+        'Logout',
+        'Anda telah logout',
+        backgroundColor: Get.theme.colorScheme.primary,
+        colorText: Get.theme.colorScheme.onPrimary,
       );
-      return null;
-    } finally {
-      isLoading.value = false;
+
+      Get.offAllNamed('/login');
+    } catch (e) {
+      print('Error during logout: $e');
     }
   }
 }

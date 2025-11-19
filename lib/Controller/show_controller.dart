@@ -1,12 +1,11 @@
 import 'dart:convert';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:pas_mobile_11pplg2_26/Models/table_shows_models.dart';
 
 class ShowController extends GetxController {
   var isLoading = false.obs;
-  var Tableshows = <Table>[].obs; 
+  var tableShows = <Tableshows>[].obs; 
 
   @override
   void onInit() {
@@ -22,9 +21,9 @@ class ShowController extends GetxController {
       print("status code: ${response.statusCode}");
       print("JSON code: ${response.body}");
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List loadedShows = data['table'];
-        loadedShows.assignAll(loadedShows.map((e) => Tableshows.fromJson(e)).toList());
+        final List<dynamic> data = jsonDecode(response.body);
+        final List<Tableshows> loadedShows = data.map((e) => Tableshows.fromJson(e)).toList();
+        tableShows.assignAll(loadedShows);
       }else {
         Get.snackbar("Error", "Failed to load shows");
       }
